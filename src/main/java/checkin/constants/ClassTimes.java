@@ -6,6 +6,7 @@ public class ClassTimes {
 
 
     public static Map<String, Map> classTimes;//从文件中解析出来的上下班点放在这里
+    public static List<String> tempPersonNameList = new ArrayList<>(0);//存储所有读取过的人名，用于排除某人特定的班次
     public static final String annotationFlag = "#";//注释的标识符，如果某行以它开头，则不进行解析
     public static final String placeHolderTime = "-1";//文件中占位时间的标志约定为-1，解析成List<Integer>后的对应位置也是-1
 

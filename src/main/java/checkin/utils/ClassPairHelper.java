@@ -1,5 +1,6 @@
 package checkin.utils;
 
+import checkin.constants.ClassTimes;
 import checkin.pojo.CheckInRecord;
 import checkin.pojo.CheckInTime;
 import checkin.pojo.MonthlyCheckInRecord;
@@ -76,9 +77,24 @@ public final class ClassPairHelper {
             if (people != null) {
                 Map<String, List<Integer>> tempClassTimes = new HashMap<>();
                 Set<String> keySet = classTimes.keySet();
+                /*//以下只能判断同一个文件中的所有人名，无法跨文件判断
                 for (String className : keySet) {
                     boolean use = true;
                     for (String personName : people) {
+                        if (!personName.equals(name) && className.contains(personName) && !className.contains(name)) {
+                            use = false;
+                            break;
+                        }
+                    }
+                    if (use)
+                        tempClassTimes.put(className, classTimes.get(className));
+                }*/
+                //更改：检测排除列表，但是依然只能排除已经加载过到内存中的人名，未读取的人名依然无法排除（可以通过预加载所有文件来完美实现，但是太浪费内存，有需要的可以通过二次班次匹配来完美排除）
+                //由于当前文件在解析时已经加载进内存了，所以当前文件中所有的人名依然可以排除
+                keySet = classTimes.keySet();
+                for (String className : keySet) {
+                    boolean use = true;
+                    for (String personName : ClassTimes.tempPersonNameList) {
                         if (!personName.equals(name) && className.contains(personName) && !className.contains(name)) {
                             use = false;
                             break;
@@ -91,7 +107,8 @@ public final class ClassPairHelper {
             }
         }
 
-        if (preferClassTimes.size() == 0) {//如果没有指定班次，且一个或多个班次名字包含了自己的全名，则认为是自己定制的班，只匹配这些班，不再检测其他班次的匹配程度
+        if (preferClassTimes.size() == 0) {
+            //如果没有指定班次，且一个或多个班次名字包含了自己的全名，则认为是自己定制的班，只匹配这些班，不再检测其他班次的匹配程度
             Map<String, List<Integer>> customizedClassTimes = new HashMap<>(0);
             for (String className : classTimes.keySet()) {
                 if (name != null && !name.trim().equals("") && className.contains(name)) {

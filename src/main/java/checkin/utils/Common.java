@@ -7,6 +7,22 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 public final class Common {
+
+    //判断Map中班次是否是最后一层Map<班次名,List<上下班时间>>
+    public static boolean isLastMap(Object obj) {
+        try {
+            Map<String, List<Integer>> map = (Map) obj;
+            for (Map.Entry<String, List<Integer>> entry : map.entrySet()) {
+                List<Integer> times = entry.getValue();
+                if (times.size() == 0)
+                    return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
     public static boolean isNumeric(String s) {
 
         if (s != null && !"".equals(s.trim()))

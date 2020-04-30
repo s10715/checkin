@@ -108,14 +108,16 @@ public class Executor {
      * @param confirmForm  基本路径下所有的考勤确认表
      * @param dirFullMatch 子路径是否需要全匹配，如果为true，目录名要对应ClassTimes的key得到map，下一级目录名还要对应上个map的key再得到一个map，以此类推
      *                     如果为false，则忽略文件夹的名字，只要文件名在ClassTimes.classTimes的key中（包括类型为Map<String,Map>的子map的key中）都可以（
-     *                     由于key会按"、"分割，如果班次名字有重复，后面会覆盖前面）
+     *                     由于key会按"、"分割，<del>如果班次名字有重复，后面会覆盖前面</del>）
      */
     private static void pairClass(String baseDir, String subDir, Map<String, Map<String, ConfirmForm>> confirmForm, boolean dirFullMatch) {
         //1.根据文件夹名和文件名查找可能的班次
-        Map<String, List<Integer>> possibleClassTimes = null;
+        Map<String, List<Integer>> possibleClassTimes = new HashMap<>();
         File file = new File(baseDir + File.separator + subDir);
 
+
         if (dirFullMatch) {
+
             //1.遇到文件夹在ClassTimes的key中查找包含该文件夹名字的下一个map/list（按照规定的目录结构，如果下面还有文件夹则得到的是map
             // ，否则是一个包含打卡时间的list），如果还有文件夹，就再在上次找到的map的key中继续找包含该文件夹名字的记录，直到没有文件夹为止
             //2.遇到文件则在ClassTimes的key中找包含该文件名（去掉后缀）的记录
@@ -124,46 +126,82 @@ public class Executor {
             //Windows下文件分割符为“\”如果直接split(File.separator)会报错，需要转义字符
             String[] dirs = subDir.split("\\".equals(File.separator) ? "\\\\" : File.separator);
 
-            Map tempMap = null;
-            for (String key : ClassTimes.classTimes.keySet()) {
-                //可能多个 文件/文件夹 都对应一个班次，为了不需要重复写，key都用"、"分隔，按"、"分开后才是可能的文件名
-                String[] names = key.split("、");
-                for (String name : names) {
-                    if (name.equals(Common.getFileName(dirs[0]))) {
-                        tempMap = ClassTimes.classTimes.get(key);
-                        break;
+
+            if (dirs.length > 1) {//如果需要匹配多层
+
+                //1.找到第一层，方便后面搜索，按文件的路径和设定的班次父路径进行一层层对比，如果第一层就没有找到，则tempMap为null，后面就不会继续了，否则找到的可能是下一层的文件夹名或文件名
+                Map tempMap = null;
+                for (String key : ClassTimes.classTimes.keySet()) {
+                    //可能多个 文件/文件夹 都对应一个班次，为了不需要重复写，key都用"、"分隔，按"、"分开后才是可能的文件名
+                    String[] names = key.split("、");
+                    for (String name : names) {
+                        if (name.equals(Common.getFileName(dirs[0])) && !Common.isLastMap(ClassTimes.classTimes.get(key))) {
+                            tempMap = ClassTimes.classTimes.get(key);
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (tempMap != null) {
-                for (int i = 1; i < dirs.length; i++) {
-                    boolean found = false;
 
-                    for (Object key : tempMap.keySet()) {
-                        //可能多个 文件/文件夹 都对应一个班次，为了不需要重复写，key都用"、"分隔，按"、"分开后才是可能的文件名
-                        String[] names = key.toString().split("、");
-                        for (String name : names) {
-                            if (name.equals(Common.getFileName(dirs[i]))) {
-                                tempMap = (Map) tempMap.get(key);
-                                found = true;
-                                break;
+                //2.检测所有文件夹名字是否对应，到文件为止（不包含），dirs[length-1]就是文件名，如果文件的路径没有完整匹配班次设定的父路径，则tempMap再次会置空
+                //这里要找到一个就break，因为路径是唯一指定的
+                if (tempMap != null) {
+                    for (int i = 1; i < dirs.length - 1; i++) {
+                        boolean found = false;
+
+                        for (Object key : tempMap.keySet()) {
+                            //可能多个 文件/文件夹 都对应一个班次，为了不需要重复写，key都用"、"分隔，按"、"分开后才是可能的文件名
+                            String[] names = key.toString().split("、");
+                            for (String name : names) {
+                                if (name.equals(Common.getFileName(dirs[i])) && !Common.isLastMap(ClassTimes.classTimes.get(key))) {
+                                    tempMap = (Map) tempMap.get(key);
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
-                        if (found)
-                            break;
-                    }
 
-                    if (tempMap == null)//要是有匹配的班次名字，但该班次还没有设置打卡时间或没有子班次，就退出查找
-                        break;
-                    if (!found) {//如果这一层子目录没有匹配的map，要把上一层对应的tempMap置空，然后退出查找
-                        tempMap = null;
-                        break;
+                        if (tempMap == null)//要是有匹配的班次名字，但该班次还没有设置打卡时间或没有子班次，就退出查找
+                            break;
+                        if (!found) {//如果这一层子目录没有匹配的map，要把上一层对应的tempMap置空，然后退出查找
+                            tempMap = null;
+                            break;
+                        }
                     }
                 }
+
+
+                //3.找出班次名包含文件名的班次，加进possibleClassTimes中
+                //一个文件名可以对应多个班次，所以找到一个不能直接break，要继续往后找
+                if (tempMap != null) {
+                    for (Object key : tempMap.keySet()) {
+                        //可能多个文件都对应一个班次，为了不需要重复写，key都用"、"分隔，按"、"分开后才是可能的文件名
+                        String[] names = key.toString().split("、");
+                        for (String name : names) {
+                            //除了要满足班次的文件名按"、"分割后和当前的文件名一样外，还必须是下一层就是Map<班次名,List<上下班时间>>
+                            if (name.equals(Common.getFileName(file.getName())) && Common.isLastMap(tempMap.get(key))) {
+                                possibleClassTimes.putAll((Map<String, List<Integer>>) tempMap.get(key));
+                            }
+                        }
+                    }
+                }
+
+            } else {//如果当前文件就只有一个文件，没有指定的父路径
+
+                for (String key : ClassTimes.classTimes.keySet()) {
+                    String[] names = key.split("、");
+                    for (String name : names) {
+                        //除了要满足班次的文件名按"、"分割后和当前的文件名一样外，还必须是下一层就是Map<班次名,List<上下班时间>>
+                        if (name.equals(Common.getFileName(dirs[0])) && Common.isLastMap(ClassTimes.classTimes.get(key))) {
+                            possibleClassTimes.putAll(ClassTimes.classTimes.get(key));
+                            break;
+                        }
+                    }
+                }
+
             }
-            possibleClassTimes = tempMap;
-        } else {
+
+        } else {//如果只要求匹配文件名，不需要判断父文件夹名字是否吻合
             //展开ClassTimes.classTimes，把value为Map<String, List>的位置不变，把value为Map<String, Map>的都展开然后放到根map中
             Map<String, Map<String, List<Integer>>> tempClassTimes = ClassTimes.expandClassTimesMap();
             //根据文件名（去掉后缀）查找所有班次中包含该文件名的（如果有重复的班次名称，后面的会覆盖前面的）
@@ -172,19 +210,22 @@ public class Executor {
                 String[] names = key.split("、");
                 for (String name : names) {
                     if (name.equals(Common.getFileName(file.getName()))) {
-                        possibleClassTimes = tempClassTimes.get(key);
-                        break;
+                        possibleClassTimes.putAll(tempClassTimes.get(key));
                     }
                 }
             }
         }
 
         //如果没有可能的班次，就直接返回
-        if (possibleClassTimes == null)
+        if (possibleClassTimes == null || possibleClassTimes.size() == 0)
             return;
 
         //2.读取excel文件
         List<Person> personList = ExcelHelper.readPerson(file.getAbsolutePath());
+
+        //补充：缓存人名，用于构建排除列表，排除某人指定的班次
+        for (Person p : personList)
+            ClassTimes.tempPersonNameList.add(p.getName());
 
         //3.根据之前找到的可能的班次进行班次匹配
         List<Person> pairedPersonList = ClassPairHelper.pairClasses(personList, possibleClassTimes);

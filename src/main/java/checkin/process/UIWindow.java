@@ -1,6 +1,6 @@
 package checkin.process;
 
-import checkin.Main;
+import checkin.M;
 import checkin.utils.Common;
 
 import javax.swing.*;
@@ -47,7 +47,7 @@ public class UIWindow {
 
         try {
             //要使生成的jar有图标，就使用该方法，并手动把图标文件复制到jar包中的checking目录下（和Main.class同级目录），但是直接编译运行使用这种方法会报错
-            frame.setIconImage(new ImageIcon(Main.class.getResource("icon.png")).getImage());
+            frame.setIconImage(new ImageIcon(M.class.getResource("icon.png")).getImage());
         } catch (NullPointerException e) {
             //e.printStackTrace();
         }
@@ -227,7 +227,7 @@ public class UIWindow {
         button2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser() {
+                JFileChooser fileChooser = new JFileChooser();/* {
                     @Override
                     public Icon getIcon(File f) {
                         ImageIcon icon = null;
@@ -242,7 +242,7 @@ public class UIWindow {
                         }
                         return icon;
                     }
-                };
+                };*/
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 fileChooser.setDialogTitle("选择要生成考勤确认表的文件夹");
 
@@ -386,7 +386,7 @@ public class UIWindow {
 
             try {
                 //要使生成的jar有图标，就使用该方法，并手动把图标文件复制到jar包中的checking目录下（和Main.class同级目录），但是直接编译运行使用这种方法会报错
-                setIconImage(new ImageIcon(Main.class.getResource("icon.png")).getImage());
+                setIconImage(new ImageIcon(M.class.getResource("icon.png")).getImage());
             } catch (NullPointerException e) {
                 //e.printStackTrace();
             }
@@ -453,7 +453,7 @@ public class UIWindow {
 
             try {
                 //要使生成的jar有图标，就使用该方法，并手动把图标文件复制到jar包中的checking目录下（和Main.class同级目录），但是直接编译运行使用这种方法会报错
-                setIconImage(new ImageIcon(Main.class.getResource("icon.png")).getImage());
+                setIconImage(new ImageIcon(M.class.getResource("icon.png")).getImage());
             } catch (NullPointerException e) {
                 //e.printStackTrace();
             }

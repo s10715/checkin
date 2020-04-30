@@ -5,7 +5,7 @@ import checkin.process.UIWindow;
 
 import java.util.Arrays;
 
-public class Main {
+public class M {
 
     public static void main(String[] args) {
         //功能一，班次匹配

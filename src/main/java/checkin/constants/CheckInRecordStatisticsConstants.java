@@ -121,7 +121,7 @@ public class CheckInRecordStatisticsConstants {
 
 
         //TODAY() -> CheckInRecordConstants.dateCol + end
-        list.set(全勤Col, "=IF(AND(" + 计薪Letter + current + "=DAY(DATE(YEAR("+CheckInRecordConstants.dateLetter+end+"),MONTH("+CheckInRecordConstants.dateLetter+end+"),)),H" + current + "=0," + 漏打卡Letter + current + "=0),\"有\",\"无\")");//全勤，如果计薪等于当月天数，且无迟到早退、漏打卡则有
+        list.set(全勤Col, "=IF(AND(" + 计薪Letter + current + "=DAY(DATE(YEAR("+CheckInRecordConstants.dateLetter+end+"),MONTH("+CheckInRecordConstants.dateLetter+end+")+1,)),H" + current + "=0," + 漏打卡Letter + current + "=0),\"有\",\"无\")");//全勤，如果计薪等于当月天数，且无迟到早退、漏打卡则有
 
 
 
