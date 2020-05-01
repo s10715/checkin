@@ -3,7 +3,6 @@ package checkin.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public final class Common {
@@ -14,8 +13,6 @@ public final class Common {
             Map<String, List<Integer>> map = (Map) obj;
             for (Map.Entry<String, List<Integer>> entry : map.entrySet()) {
                 List<Integer> times = entry.getValue();
-                if (times.size() == 0)
-                    return false;
             }
         } catch (Exception e) {
             return false;

@@ -2,15 +2,13 @@ package checkin.process;
 
 import checkin.M;
 import checkin.utils.Common;
+import checkin.utils.EncryptUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 
 public class UIWindow {
 
-    public void run() {
+    public void runPasswordFrame() {
 
 
         try {
@@ -27,6 +25,94 @@ public class UIWindow {
         } catch (Exception e) {
             //e.printStackTrace();
         }
+
+        //-----------------------------------------密码框部分-----------------------------------------
+
+        JFrame pwdFrame = new JFrame();
+        pwdFrame.setSize(400, 200);
+        pwdFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        pwdFrame.setLocationRelativeTo(null);
+        pwdFrame.setTitle("请输入使用密码");
+        pwdFrame.setBackground(Color.GRAY);
+        pwdFrame.setLayout(null);
+        pwdFrame.setResizable(false);
+        try {
+            //直接编译运行要使用图标用这种方法，但是生成jar包后无法显示图标
+            pwdFrame.setIconImage(new ImageIcon("icon.png").getImage());
+        } catch (NullPointerException e) {
+            //e.printStackTrace();
+        }
+
+        try {
+            //要使生成的jar有图标，就使用该方法，并手动把图标文件复制到jar包中的checking目录下（和Main.class同级目录），但是直接编译运行使用这种方法会报错
+            pwdFrame.setIconImage(new ImageIcon(M.class.getResource("icon.png")).getImage());
+        } catch (NullPointerException e) {
+            //e.printStackTrace();
+        }
+        JTextField pwdField = new JTextField();
+        pwdField.setBounds(50, 40, 300, 40);
+        pwdField.setBackground(Color.WHITE);
+        pwdField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String pwd = pwdField.getText();
+                    if (pwd != null && EncryptUtils.generatePassWord().equals(pwd.toLowerCase())) {
+                        pwdFrame.setVisible(false);
+                        runMainFrame();
+                    }
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+        pwdFrame.add(pwdField);
+
+        JButton pwdButton = new JButton("确定");
+        pwdButton.setBounds(75, 100, 100, 40);
+        pwdButton.setFocusPainted(false);
+        pwdButton.setBackground(Color.WHITE);
+        pwdButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String pwd = pwdField.getText();
+                if (pwd != null && EncryptUtils.generatePassWord().equals(pwd.toLowerCase())) {
+                    pwdFrame.setVisible(false);
+                    runMainFrame();
+                }
+            }
+        });
+        pwdFrame.add(pwdButton);
+
+
+        JButton cancelButton = new JButton("退出");
+        cancelButton.setBounds(225, 100, 100, 40);
+        cancelButton.setFocusPainted(false);
+        cancelButton.setBackground(Color.WHITE);
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pwdFrame.setVisible(false);
+                System.exit(0);
+            }
+        });
+        pwdFrame.add(cancelButton);
+
+        pwdFrame.setVisible(true);
+
+
+    }
+
+    public void runMainFrame() {
+        //-----------------------------------------主界面部分-----------------------------------------
 
         JFrame frame = new JFrame();
         frame.setSize(300, 350);
@@ -59,7 +145,6 @@ public class UIWindow {
             String content = new String(Common.readFile(classTimeFile.getAbsolutePath()), StandardCharsets.UTF_8);//读取配置的打卡时间
             Executor.parseClassTimes(content);//应用配置的打卡时间
         }
-
 
         //-------------------------------菜单-------------------------------
         JMenuBar menuBar = new JMenuBar();

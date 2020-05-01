@@ -100,7 +100,7 @@
                         <!--<option>-keepclassmembers public class * {void set*(***);*** get*();}</option>-->
 
                         <!-- 不混淆checkin.Main的类名，且类中的方法也不混淆-->
-                        <option>-keep class checkin.Main { &lt;methods&gt;; }</option>
+                        <option>-keep class checkin.M { &lt;methods&gt;; }</option>
                     </options>
                     <outjar>${project.build.finalName}-pg.jar</outjar>
                     <!-- 添加依赖，这里你可以按你的需要修改，这里测试只需要一个JRE的Runtime包就行了 -->

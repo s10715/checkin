@@ -64,9 +64,9 @@ public class ClassTimes {
         Map<String, Map<String, List<Integer>>> tempClassTimes = new HashMap<>();
         for (String key : ClassTimes.classTimes.keySet()) {
             Map value = ClassTimes.classTimes.get(key);
-            if (value.values().iterator().next() instanceof List) {//<文件名,<班次名,上下班点>>的形式
+            if (value.values().iterator().next() instanceof List) {//Map<文件名,Map<班次名,List<上下班点>>>的形式
                 tempClassTimes.put(key, (Map<String, List<Integer>>) ClassTimes.classTimes.get(key));
-            } else if (value.values().iterator().next() instanceof Map) {//子Map是<文件夹名,<文件名,<班次名,上下班点>>>（包括多层文件夹名）的形式，查找所有子文件夹，并展开
+            } else if (value.values().iterator().next() instanceof Map) {//子Map是 Map<文件夹名,Map<文件名,Map<班次名,List<上下班点>>>>（包括多层文件夹名）的形式，查找所有子文件夹，并展开
                 LinkedList<Map<String, Map>> tempList = new LinkedList<>();//用栈去递归
                 tempList.push(value);
 

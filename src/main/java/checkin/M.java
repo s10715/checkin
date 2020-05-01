@@ -1,9 +1,6 @@
 package checkin;
 
-import checkin.constants.ClassTimes;
 import checkin.process.UIWindow;
-
-import java.util.Arrays;
 
 public class M {
 
@@ -15,7 +12,11 @@ public class M {
         //Executor.generateConfirmForm("./处理好数据");
 
         try {
-            new UIWindow().run();
+            //不需要密码
+            //new UIWindow().runMainFrame();
+
+            //需要密码
+            new UIWindow().runPasswordFrame();
         } catch (Exception e) {
             //e.printStackTrace();
         }

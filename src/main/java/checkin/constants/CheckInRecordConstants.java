@@ -1,9 +1,5 @@
 package checkin.constants;
 
-import checkin.utils.Common;
-
-import java.util.List;
-
 /**
  * 记录打卡记录的位置信息
  * 格式为：
